@@ -1,91 +1,107 @@
-// 1) Referenciar o input
+// 1) Temos que referenciar o input
 let input = document.querySelector('input[name=tarefa]');
 
-// 2) Referenciar o button
+// 2) Temos que referenciar o button
 let btn = document.querySelector('#botao');
 
-
-// 3) Referenciar a lista
+// 3) Temos que referenciar a lista
 let lista = document.querySelector('#lista');
 
-//Card
+// card
 let card = document.querySelector('.card');
 
-let tarefas = [
-  'jogar GTA5',
-  'Estudar python',
-  'Estudar JavaScript',
-  'Ver um filme',
-  'Ler um livro'
-];
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
-function renderizarTarefas() {
+function renderizarTarefas(){
 
-  //Limpar a listagem de itens antes de renderizar novamente a tela
-  lista.innerHTML = '';
+    // Limpar a listagem de itens antes de renderizar novamente a tela
+    lista.innerHTML = '';
 
-  for (tarefa of tarefas) {
-    // criar o item da lista
-    let itemLista = document.createElement('li');
+    for(tarefa of tarefas){
+        //Criar o item da lista
+        let itemLista = document.createElement('li');
 
-    // adicionar as classes no item da lista
-    itemLista.setAttribute('class', 'list-group-item list-group-item-action');
+        //Adicionar classes no item da lista
+        itemLista.setAttribute('class', 'list-group-item list-group-item-action');
 
-    //Criar um texto 
-    let itemTexto = document.createTextNode(tarefa);
+        // Adicionar evento de clique no item da lista
+        itemLista.onclick = function(){
+            deletarTarefa(this);
+        }
 
-    //Adicionar o texto no item da lista
-    itemLista.appendChild(itemTexto);
+        // Criar um texto
+        let itemTexto = document.createTextNode(tarefa);
 
-    // Adicionar o item da lista na lista
-    lista.appendChild(itemLista);
-  }
+        // Adicionar o texto no item da lista
+        itemLista.appendChild(itemTexto);
+
+        // Adicionar o item da lista na lista
+        lista.appendChild(itemLista);
+    }
 }
-//Executando a função renderizar as tarefas
+
+// Executando a função para renderizar as tarefas
 renderizarTarefas();
 
-// 0)inserindo dados na aplicação
-// 1)precisamos escutar o evento de click no botão
+// 1) Precisamos "escutar" o evento de clique no botão
 btn.onclick = function(){
-  // 2) Precisamos capturar o valor digitado pelo usuario no input  
-  let novaTarefa = input.Value;
+    // 2) Precisamos capturar o valor digitado pelo usuário no input
+    let novaTarefa = input.value;
 
-  if (novaTarefa !== " "){
+    if(novaTarefa !== ""){
+        // 3) Precisamos atualizar a nova tarefa na lista (array) de tarefas e renderizar a tela
+        tarefas.push(novaTarefa);
 
-    // 3) Precisamos atualizar a nova tarefa na lista (array) de tarefas e renderizar a tela
-    tarefas.push(novaTarefa);
+        // Executando a função para renderizar as tarefas
+        renderizarTarefas();
 
-    //Executar a função de renderizar a tela
-    renderizarTarefas();
+        // Limpar o input
+        input.value = '';
 
-    // Limpar o input
-    input.value = ' ';
+        // Limpar mensagens de erro (spans)
+        removerSpans();
 
-    //Limpar mensagens de erros (spans)
-    removerSpans();
-  }else{
-    //Limpar mensagens de erros (spans)
-    removerSpans();
+        // Salva os novos dados no banco de dados
+        salvarDadosNoStorage();
+    }else{
+        // Limpar mensagens de erro (spans)
+        removerSpans();
 
-    let span = document.createElement('span');
-    span.setAttribute('class', 'alert alert-warning');
+        let span = document.createElement('span');
+        span.setAttribute('class', 'alert alert-warning');
 
-    let msg = document.createTextNode('Você precisa informar a tarefa');
+        let msg = document.createTextNode('Você precisa informar a tarefa!');
 
-    span.appendChild(msg);
+        span.appendChild(msg);
 
-    card.appendChild(span);
-  }
-
+        card.appendChild(span);
+    }    
 }
 
-function removerSpans(){
-  let spans = document.querySelectorAll('span');
 
-  for(let i = 0; i < spans.length; i++){
-    card.removeChild(spans[i]);
-  }
-  
+function removerSpans(){
+    let spans = document.querySelectorAll('span');
+
+    for(let i = 0; i < spans.length; i++){
+        card.removeChild(spans[i]);
+    }
+}
+
+function deletarTarefa(tar){
+    // Remove a tarefa do array
+    tarefas.splice(tarefas.indexOf(tar.textContent), 1);
+
+    // renderiza novamente a tela
+    renderizarTarefas();
+
+    // Salva os novos dados no banco de dados
+    salvarDadosNoStorage();
+}
+
+
+function salvarDadosNoStorage(){
+    // Todo navegador web possui esta capacidade
+    localStorage.setItem('tarefas', JSON.stringify(tarefas));
 }
 
 
